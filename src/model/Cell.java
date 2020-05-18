@@ -3,7 +3,13 @@ package model;
 public class Cell {
 
     private final int row;
+    public int getRow() {
+        return row;
+    }
     private final int column;
+    public int getColumn() {
+        return column;
+    }
     private String value;
     public String getValue() {
         return value;

@@ -1,9 +1,6 @@
 package controller;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.application.Platform;
 import model.Cell;
 import model.SpreadSheet;
 import view.SpreadSheetView;
@@ -13,36 +10,61 @@ public class SpreadSheetController {
     private final SpreadSheet model;
     private final SpreadSheetView view;
 
-    private int leftPosition;
-    private int topPosition;
+    private int row;
+    private int col;
+    private int hScrollPosition;
+    private int vScrollPosition;
 
     public SpreadSheetController(SpreadSheetView view) {
         model = new SpreadSheet();
         this.view = view;
         setBindings();
-    }
-
-    public String getColumnHeaderText(int col) {
-        return String.valueOf(col+leftPosition+1);
-    }
-
-    public String getRowHeaderText(int row) {
-        return String.valueOf(row+topPosition+1);
-    }
-
-    public String getCellText(int row, int col) {
-        return model.getCellText(row+topPosition, col+leftPosition);
+        Platform.runLater(view::redraw);
     }
 
     private void setBindings() {
         view.getHScrollValueProperty().addListener((o, oldValue, newValue) -> {
-            leftPosition = newValue.intValue();
+            hScrollPosition = newValue.intValue();
             view.redraw();
         });
         view.getVScrollValueProperty().addListener((o, oldValue, newValue) -> {
-            topPosition = newValue.intValue();
+            vScrollPosition = newValue.intValue();
             view.redraw();
         });
     }
 
+    public void move(int dRow, int dCol) {
+        int oldRow = row;
+        int oldCol = col;
+        row = Math.max(0, Math.min(row+dRow, SpreadSheetView.MAX_ROW-1));
+        col = Math.max(0, Math.min(col+dCol, SpreadSheetView.MAX_COLUMN-1));
+
+        if (dRow != 0 && oldRow == row)
+            view.moveScrollBar(0, dRow);
+        else if (dCol != 0 && oldCol == col)
+            view.moveScrollBar(dCol, 0);
+        else
+            view.setCellFocus();
+    }
+    public void moveTo(Cell cell) {
+        if (cell != null) {
+            row = cell.getRow()-vScrollPosition;
+            col = cell.getColumn()-hScrollPosition;
+        }
+    }
+
+    public String getColumnHeaderText(int col) {
+        return String.valueOf(col+hScrollPosition+1);
+    }
+    public String getRowHeaderText(int row) {
+        return String.valueOf(row+vScrollPosition+1);
+    }
+    public String getCellText(int row, int col) {
+        return model.getCellText(row+vScrollPosition, col+hScrollPosition);
+    }
+    public Cell getCell(int row, int col) {
+        return model.getCell(row+vScrollPosition, col+hScrollPosition);
+    }
+    public int getRow() { return row; }
+    public int getCol() { return col; }
 }

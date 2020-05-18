@@ -15,6 +15,6 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        root.getChildren().add(new SpreadSheetView().getView());
+        root.getChildren().add(new SpreadSheetView());
     }
 }

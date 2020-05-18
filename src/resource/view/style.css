@@ -1,0 +1,12 @@
+.column-header, .row-header {
+    -fx-background-color: ghostwhite;
+    -fx-border-color: lightgrey;
+}
+
+.cell {
+    -fx-border-color: lightgrey;
+}
+
+.cell:focused {
+    -fx-border-width: 0 0 0 0;
+}

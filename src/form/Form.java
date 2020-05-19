@@ -36,7 +36,6 @@ public class Form extends VBox {
         this.view = view;
         init();
         setBindings();
-        this.focusedProperty().addListener(o ->System.out.println("FOCUSED"));
     }
 
     private void init() {

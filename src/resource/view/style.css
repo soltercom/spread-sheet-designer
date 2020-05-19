@@ -10,3 +10,10 @@
 .cell:focused {
     -fx-border-width: 0 0 0 0;
 }
+
+/*noinspection CssInvalidPseudoSelector*/
+.cell:edit {
+    -fx-background-color: dodgerblue;
+    -fx-text-fill: white;
+}
+

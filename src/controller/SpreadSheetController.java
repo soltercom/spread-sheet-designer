@@ -43,13 +43,17 @@ public class SpreadSheetController {
             view.moveScrollBar(0, dRow);
         else if (dCol != 0 && oldCol == col)
             view.moveScrollBar(dCol, 0);
-        else
+        else {
             view.setCellFocus();
+            view.updateForm();
+        }
+
     }
     public void moveTo(Cell cell) {
         if (cell != null) {
             row = cell.getRow()-vScrollPosition;
             col = cell.getColumn()-hScrollPosition;
+            view.updateForm();
         }
     }
 
@@ -67,4 +71,5 @@ public class SpreadSheetController {
     }
     public int getRow() { return row; }
     public int getCol() { return col; }
+
 }

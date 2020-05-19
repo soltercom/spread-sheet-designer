@@ -1,13 +1,12 @@
 package view;
 
 import controller.SpreadSheetController;
-import javafx.application.Platform;
+import form.Form;
 import javafx.beans.property.DoubleProperty;
+import javafx.css.PseudoClass;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -15,15 +14,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import model.Cell;
 
-import java.util.Objects;
-
 public class SpreadSheetView extends GridPane {
 
     private static final double CELL_WIDTH = 75.0D;
     private static final double CELL_HEIGHT = 25.0D;
     private static final double SCROLL_BAR_WIDTH = 20.0D;
+    private static final double FORM_WIDTH = 200.0D;
     public static final int MAX_COLUMN = 15;
     public static final int MAX_ROW = 25;
+
+    private static final PseudoClass EDIT_CELL_CLASS = PseudoClass.getPseudoClass("edit");
 
     private final SpreadSheetController controller;
 
@@ -34,7 +34,10 @@ public class SpreadSheetView extends GridPane {
     private TextField[] rowHeaders    = new TextField[MAX_ROW];
     private TextField[][] cells       = new TextField[MAX_ROW][MAX_COLUMN];
 
+    private Form form;
+
     public SpreadSheetView() {
+        form = new Form(this);
         initView();
         controller = new SpreadSheetController(this);
     }
@@ -91,6 +94,8 @@ public class SpreadSheetView extends GridPane {
                 add(cells[i][j], j+1, i+1);
             }
 
+        getColumnConstraints().add(new ColumnConstraints(FORM_WIDTH));
+        add(form, MAX_COLUMN + 2, 0, 1, MAX_ROW + 1);
     }
 
     private void onCellMousePressed(MouseEvent event) {
@@ -123,11 +128,29 @@ public class SpreadSheetView extends GridPane {
             }
 
         setCellFocus();
+        updateForm();
+    }
 
+    public void beforeEditCell() {
+        TextField cell = cells[controller.getRow()][controller.getCol()];
+        cell.pseudoClassStateChanged(EDIT_CELL_CLASS, true);
+    }
+
+    public void afterEditCell() {
+        TextField cell = cells[controller.getRow()][controller.getCol()];
+        cell.setText(controller.getCellText(controller.getRow(), controller.getCol()));
+        cell.requestFocus();
+        cell.pseudoClassStateChanged(EDIT_CELL_CLASS, false);
     }
 
     public void setCellFocus() {
-        cells[controller.getRow()][controller.getCol()].requestFocus();
+        TextField cell = cells[controller.getRow()][controller.getCol()];
+        cell.requestFocus();
+    }
+
+    public void updateForm() {
+        TextField cell = cells[controller.getRow()][controller.getCol()];
+        form.setCell((Cell)cell.getUserData());
     }
 
     public void moveScrollBar(int dH, int dV) {

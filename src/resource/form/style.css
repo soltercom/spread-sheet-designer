@@ -1,0 +1,24 @@
+/*noinspection CssInvalidPseudoSelector*/
+.simple-control:required,
+.simple-control:invalid,
+.simple-control:changed {
+    -fx-padding: 0 0 0 5px;
+    -fx-border-width: 0 4px 0 0;
+    -fx-border-insets: 5px 5px 5px 0;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.simple-control:required {
+    -fx-border-color: transparent #EBDE4C transparent transparent;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.simple-control:changed {
+    -fx-border-color: transparent #4cadeb transparent transparent;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.simple-control:invalid {
+    -fx-control-inner-background: #ffe5e5;
+    -fx-border-color: transparent #EB4C4C transparent transparent;
+}

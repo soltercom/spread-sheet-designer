@@ -20,7 +20,7 @@ public class SpreadSheet {
     }
 
     public String getCellText(int row, int col) {
-        return cells[row][col].valueProperty().getValue();
+        return cells[row][col].getValue();
     }
 
     public Cell getCell(int row, int col) {

@@ -1,7 +1,8 @@
 /*noinspection CssInvalidPseudoSelector*/
 .simple-control:required,
 .simple-control:invalid,
-.simple-control:changed {
+.simple-control:changed,
+simple-combobox:changed {
     -fx-padding: 0 0 0 5px;
     -fx-border-width: 0 4px 0 0;
     -fx-border-insets: 5px 5px 5px 0;
@@ -21,4 +22,11 @@
 .simple-control:invalid {
     -fx-control-inner-background: #ffe5e5;
     -fx-border-color: transparent #EB4C4C transparent transparent;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.simple-combobox:changed {
+    -fx-border-color: transparent #4cadeb transparent transparent;
+    -fx-border-width: 0 4px 0 0;
+    -fx-border-insets: 0 -10px 0 0;
 }

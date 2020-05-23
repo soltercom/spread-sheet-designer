@@ -2,9 +2,11 @@ package model;
 
 public class SpreadSheet {
 
-    public final int MAX_COLUMN = 45;
-    public final int MAX_ROW = 75;
+    public static final int MAX_COLUMN = 45;
+    public static final int MAX_ROW = 70;
 
+    private final ColumnHeader columnHeader = new ColumnHeader();
+    private final RowHeader rowHeader = new RowHeader();
     private final Cell[][] cells = new Cell[MAX_ROW][MAX_COLUMN];
 
     public SpreadSheet() {
@@ -12,15 +14,21 @@ public class SpreadSheet {
     }
 
     private void init() {
-        for (int i = 0; i < MAX_ROW; i++) {
-            for (int j = 0; j < MAX_COLUMN; j++) {
-                cells[i][j] = new Cell(i, j, (i+1) + ":" + (j+1), CellType.TEXT);
-            }
-        }
+        for (int i = 0; i < MAX_COLUMN; i++)
+            columnHeader.add(new Column(i+1));
+        for (int i = 0; i < MAX_ROW; i++)
+            rowHeader.add(new Row(i+1));
+        for (int i = 0; i < MAX_ROW; i++)
+            for (int j = 0; j < MAX_COLUMN; j++)
+                cells[i][j] = new Cell(i, j, i + ":" + j, CellType.TEXT);
     }
 
-    public String getCellText(int row, int col) {
-        return cells[row][col].getValue();
+    public ColumnHeader getColumnHeader() {
+        return columnHeader;
+    }
+
+    public RowHeader getRowHeader() {
+        return rowHeader;
     }
 
     public Cell getCell(int row, int col) {

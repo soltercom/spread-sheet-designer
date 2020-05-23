@@ -1,5 +1,6 @@
 package form;
 
+import form.validator.Validators;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.css.PseudoClass;
@@ -12,11 +13,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import model.Cell;
 import model.CellType;
-import view.SpreadSheetView;
+import view.SpreadSheetViewFixed;
 
 public class Form extends VBox {
 
     private static final PseudoClass CHANGED_CLASS = PseudoClass.getPseudoClass("changed");
+    private static final PseudoClass INVALID_CLASS = PseudoClass.getPseudoClass("invalid");
 
     private TextField valueField;
     private ComboBox<CellType> typeField;
@@ -36,9 +38,9 @@ public class Form extends VBox {
 
     private Cell cell;
 
-    private final SpreadSheetView view;
+    private final SpreadSheetViewFixed view;
 
-    public Form(SpreadSheetView view) {
+    public Form(SpreadSheetViewFixed view) {
         this.view = view;
         init();
         setBindings();
@@ -91,10 +93,16 @@ public class Form extends VBox {
         typePropertyChanged.bind(typeProperty.isNotEqualTo(cell.typeProperty()));
         changed.bind(valuePropertyChanged.or(typePropertyChanged));
 
-        valid.bind(Bindings.createBooleanBinding(() -> cell.isValid(valueProperty, typeProperty), valueProperty, typeProperty));
+        valuePropertyValid.bind(Bindings.createBooleanBinding(() -> {
+            if (typeProperty.getValue() == CellType.TEXT) return true;
+            return Validators.NAME.validate(valueProperty.getValue());
+        }, valueProperty, typeProperty));
+
+        valid.bind(valuePropertyValid);
 
         valuePropertyChanged.addListener(inv -> valueField.pseudoClassStateChanged(CHANGED_CLASS, valuePropertyChanged.getValue()));
         typePropertyChanged.addListener(inv -> typeField.pseudoClassStateChanged(CHANGED_CLASS, typePropertyChanged.getValue()));
+        valuePropertyValid.addListener(inv -> valueField.pseudoClassStateChanged(INVALID_CLASS, !valuePropertyValid.getValue()));
     }
 
     public void save() {

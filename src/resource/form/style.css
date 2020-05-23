@@ -19,14 +19,14 @@ simple-combobox:changed {
 }
 
 /*noinspection CssInvalidPseudoSelector*/
-.simple-control:invalid {
-    -fx-control-inner-background: #ffe5e5;
-    -fx-border-color: transparent #EB4C4C transparent transparent;
-}
-
-/*noinspection CssInvalidPseudoSelector*/
 .simple-combobox:changed {
     -fx-border-color: transparent #4cadeb transparent transparent;
     -fx-border-width: 0 4px 0 0;
     -fx-border-insets: 0 -10px 0 0;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.simple-control:invalid {
+    -fx-control-inner-background: #ffe5e5;
+    -fx-border-color: transparent #EB4C4C transparent transparent;
 }

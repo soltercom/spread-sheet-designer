@@ -9,13 +9,13 @@ import javafx.beans.property.StringProperty;
 public class Cell {
 
     private final int row;
-    private final int column;
+    private final int col;
     private StringProperty value = new SimpleStringProperty("");
     private ObjectProperty<CellType> type = new SimpleObjectProperty<>();
 
-    public Cell(int row, int column, String value, CellType type) {
+    public Cell(int row, int col, String value, CellType type) {
         this.row = row;
-        this.column = column;
+        this.col = col;
         this.value.setValue(value);
         this.type.setValue(type);
     }
@@ -27,13 +27,6 @@ public class Cell {
     public boolean isChanged(StringProperty valueProperty, ObjectProperty<CellType> typeProperty) {
         return !(valueProperty.getValue().equals(this.valueProperty().getValue())
                 && typeProperty.getValue().equals(this.typeProperty().getValue()));
-    }
-
-    public boolean isValid(StringProperty valueProperty, ObjectProperty<CellType> typeProperty) {
-        if (typeProperty.getValue() == CellType.TEXT)
-            return true;
-
-        return Validators.NAME.validate(valueProperty.getValue());
     }
 
     public boolean save(String value, CellType type) {
@@ -49,7 +42,7 @@ public class Cell {
         return row;
     }
     public int getColumn() {
-        return column;
+        return col;
     }
     public String getValue() {
         if (type.getValue() == CellType.TEXT)
@@ -79,5 +72,7 @@ public class Cell {
         }
         return false;
     }
-
+    public String getId() {
+        return "R" + row + "C" + col;
+    }
 }

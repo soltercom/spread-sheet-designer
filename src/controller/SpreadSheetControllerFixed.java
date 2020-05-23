@@ -2,21 +2,21 @@ package controller;
 
 import javafx.application.Platform;
 import model.Cell;
-import model.SpreadSheet;
-import view.SpreadSheetView;
+import model.SpreadSheetFixed;
+import view.SpreadSheetViewFixed;
 
-public class SpreadSheetController {
+public class SpreadSheetControllerFixed {
 
-    private final SpreadSheet model;
-    private final SpreadSheetView view;
+    private final SpreadSheetFixed model;
+    private final SpreadSheetViewFixed view;
 
     private int row;
     private int col;
     private int hScrollPosition;
     private int vScrollPosition;
 
-    public SpreadSheetController(SpreadSheetView view) {
-        model = new SpreadSheet();
+    public SpreadSheetControllerFixed(SpreadSheetViewFixed view) {
+        model = new SpreadSheetFixed();
         this.view = view;
         setBindings();
         Platform.runLater(view::redraw);
@@ -36,8 +36,8 @@ public class SpreadSheetController {
     public void move(int dRow, int dCol) {
         int oldRow = row;
         int oldCol = col;
-        row = Math.max(0, Math.min(row+dRow, SpreadSheetView.MAX_ROW-1));
-        col = Math.max(0, Math.min(col+dCol, SpreadSheetView.MAX_COLUMN-1));
+        row = Math.max(0, Math.min(row+dRow, SpreadSheetViewFixed.MAX_ROW-1));
+        col = Math.max(0, Math.min(col+dCol, SpreadSheetViewFixed.MAX_COLUMN-1));
 
         if (dRow != 0 && oldRow == row)
             view.moveScrollBar(0, dRow);

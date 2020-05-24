@@ -1,12 +1,8 @@
 package view;
 
 import javafx.beans.property.DoubleProperty;
-import javafx.geometry.HPos;
-import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Cursor;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -21,16 +17,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class RowHeaderView extends GridPane {
 
-    private static final double ROW_HEADER_WIDTH = 75.0D;
-    private static final double BORDER_HEIGHT = 1.0D;
-    private static final double ROW_HEADER_HEIGHT = 600.0D;
-
     private final RowHeader model;
-    private final ScrollBar vScrollBar;
+    private final SpreadSheetView parentView;
 
-    public RowHeaderView(RowHeader model, ScrollBar vScrollBar) {
+    public RowHeaderView(RowHeader model, SpreadSheetView parentView) {
         this.model = model;
-        this.vScrollBar = vScrollBar;
+        this.parentView = parentView;
         init();
         setBindings();
     }
@@ -41,7 +33,7 @@ public class RowHeaderView extends GridPane {
             addHeaderConstraints(i);
             addLineConstraints();
         }
-        getColumnConstraints().add(new ColumnConstraints(ROW_HEADER_WIDTH));
+        getColumnConstraints().add(new ColumnConstraints(parentView.ROW_HEADER_WIDTH));
 
         for (int i = 0; i < model.size(); i++) {
             add(createHeader(i),0, 2*i+1, 1, 1);
@@ -52,8 +44,9 @@ public class RowHeaderView extends GridPane {
     }
 
     private void setBindings() {
-        vScrollBar.maxProperty().bind(model.calculateHeightProperty().subtract(ROW_HEADER_HEIGHT));
-        vScrollBar.valueProperty().addListener((o, v1, v2) -> redraw(v2.doubleValue()));
+        parentView.vScrollBarMaxProperty().bind(model.calculateHeightProperty().subtract(parentView.spreadSheetHeight));
+        parentView.vScrollBarValueProperty().addListener((o, v1, v2) -> redraw(v2.doubleValue()));
+        parentView.spreadSheetHeight.addListener(inv -> redraw(parentView.vScrollBarValueProperty().get()));
     }
 
     private void onLineDragged(@NotNull MouseEvent event) {
@@ -65,7 +58,7 @@ public class RowHeaderView extends GridPane {
     }
 
     public void redraw(double dy) {
-        setClip(new Rectangle(0, dy, ROW_HEADER_WIDTH, ROW_HEADER_HEIGHT));
+        setClip(new Rectangle(0, dy, parentView.ROW_HEADER_WIDTH, parentView.spreadSheetHeight.get()));
         setTranslateY(-dy);
     }
 
@@ -79,11 +72,10 @@ public class RowHeaderView extends GridPane {
     }
 
     private void addLineConstraints() {
-        getRowConstraints().add(new RowConstraints(BORDER_HEIGHT));
+        getRowConstraints().add(new RowConstraints(parentView.BORDER_WIDTH));
     }
 
-    private @NotNull
-    TextField createHeader(int index) {
+    private TextField createHeader(int index) {
         TextField textField = new TextField(String.valueOf(index+1));
         textField.setAlignment(Pos.CENTER);
         textField.setEditable(false);
@@ -95,8 +87,8 @@ public class RowHeaderView extends GridPane {
         return textField;
     }
 
-    private @NotNull Line createLine(int index) {
-        Line line = new Line(0, 0, ROW_HEADER_WIDTH, 0);
+    private Line createLine(int index) {
+        Line line = new Line(0, 0, parentView.ROW_HEADER_WIDTH, 0);
         line.setStroke(Color.WHITESMOKE);
         line.setOnMouseEntered(e -> setCursor(Cursor.V_RESIZE));
         line.setOnMouseExited(e -> setCursor(Cursor.DEFAULT));

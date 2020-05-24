@@ -3,7 +3,6 @@ package view;
 import javafx.beans.property.DoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
@@ -13,20 +12,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import model.ColumnHeader;
-import org.jetbrains.annotations.NotNull;
 
 public class ColumnHeaderView extends GridPane {
 
-    private static final double COLUMN_HEADER_HEIGHT = 25.0D;
-    private static final double BORDER_WIDTH = 1.0D;
-    private static final double COLUMN_HEADER_WIDTH = 1000.0;
-
     private final ColumnHeader model;
-    private final ScrollBar hScrollBar;
+    private final SpreadSheetView parentView;
 
-    public ColumnHeaderView(ColumnHeader model, ScrollBar hScrollBar) {
+    public ColumnHeaderView(ColumnHeader model, SpreadSheetView parentView) {
         this.model = model;
-        this.hScrollBar = hScrollBar;
+        this.parentView = parentView;
         init();
         setBindings();
     }
@@ -37,7 +31,7 @@ public class ColumnHeaderView extends GridPane {
             addHeaderConstraints(i);
             addLineConstraints();
         }
-        getRowConstraints().add(new RowConstraints(COLUMN_HEADER_HEIGHT));
+        getRowConstraints().add(new RowConstraints(parentView.COLUMN_HEADER_HEIGHT));
 
         for (int i = 0; i < model.size(); i++) {
             add(createHeader(i),2*i+1, 0, 1, 1);
@@ -48,11 +42,12 @@ public class ColumnHeaderView extends GridPane {
     }
 
     private void setBindings() {
-        hScrollBar.maxProperty().bind(model.calculateWidthProperty().subtract(COLUMN_HEADER_WIDTH));
-        hScrollBar.valueProperty().addListener((o, v1, v2) -> redraw(v2.doubleValue()));
+        parentView.hScrollBarMaxProperty().bind(model.calculateWidthProperty().subtract(parentView.spreadSheetWidth));
+        parentView.hScrollBarValueProperty().addListener((o, v1, v2) -> redraw(v2.doubleValue()));
+        parentView.spreadSheetWidth.addListener(inv -> redraw(parentView.hScrollBarValueProperty().get()));
     }
 
-    private void onLineDragged(@NotNull MouseEvent event) {
+    private void onLineDragged(MouseEvent event) {
         setCursor(Cursor.H_RESIZE);
         Line line = (Line)event.getSource();
         double dW = event.getX() - line.getStartX();
@@ -61,7 +56,7 @@ public class ColumnHeaderView extends GridPane {
     }
 
     public void redraw(double dx) {
-        setClip(new Rectangle(dx, 0, COLUMN_HEADER_WIDTH, COLUMN_HEADER_HEIGHT));
+        setClip(new Rectangle(dx, 0, parentView.spreadSheetWidth.get(), parentView.COLUMN_HEADER_HEIGHT));
         setTranslateX(-dx);
     }
 
@@ -75,11 +70,10 @@ public class ColumnHeaderView extends GridPane {
     }
 
     private void addLineConstraints() {
-        getColumnConstraints().add(new ColumnConstraints(BORDER_WIDTH));
+        getColumnConstraints().add(new ColumnConstraints(parentView.BORDER_WIDTH));
     }
 
-    private @NotNull
-    TextField createHeader(int index) {
+    private TextField createHeader(int index) {
         var textField = new TextField(String.valueOf(index+1));
         textField.setAlignment(Pos.CENTER);
         textField.setEditable(false);
@@ -88,8 +82,8 @@ public class ColumnHeaderView extends GridPane {
         return textField;
     }
 
-    private @NotNull Line createLine(int index) {
-        Line line = new Line(0, 0, 0, COLUMN_HEADER_HEIGHT);
+    private Line createLine(int index) {
+        Line line = new Line(0, 0, 0, parentView.COLUMN_HEADER_HEIGHT);
         line.setStroke(Color.WHITESMOKE);
         line.setOnMouseEntered(e -> setCursor(Cursor.H_RESIZE));
         line.setOnMouseExited(e -> setCursor(Cursor.DEFAULT));

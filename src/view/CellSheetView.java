@@ -3,6 +3,7 @@ package view;
 import controller.CellSheetController;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
@@ -15,38 +16,31 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-
-import java.util.HashMap;
+import model.Cell;
+import model.SpreadSheet;
 
 public class CellSheetView extends GridPane {
 
-    private static final double SPREAD_SHEET_HEIGHT = 600.0D;
-    private static final double SPREAD_SHEET_WIDTH = 1000.0D;
-    private static final double BORDER_WIDTH = 1.0D;
-
-    private final ScrollBar hScrollBar;
-    private final ScrollBar vScrollBar;
-
     private final CellSheetController controller;
+    private final SpreadSheetView parentView;
 
-    public CellSheetView(CellSheetController controller, ScrollBar hScrollBar, ScrollBar vScrollBar) {
-        this.controller = controller;
-        this.hScrollBar = hScrollBar;
-        this.vScrollBar = vScrollBar;
+    public CellSheetView(SpreadSheet model, SpreadSheetView parentView) {
+        this.controller = new CellSheetController(model, this);
+        this.parentView = parentView;
         init();
         setBindings();
     }
 
     private void init() {
-        getRowConstraints().add(new RowConstraints(BORDER_WIDTH));
+        getRowConstraints().add(new RowConstraints(parentView.BORDER_WIDTH));
         for (int i = 0; i < controller.getMaxRow(); i++) {
             addRowConstraint(i);
-            getRowConstraints().add(new RowConstraints(BORDER_WIDTH));
+            getRowConstraints().add(new RowConstraints(parentView.BORDER_WIDTH));
         }
-        getColumnConstraints().add(new ColumnConstraints(BORDER_WIDTH));
+        getColumnConstraints().add(new ColumnConstraints(parentView.BORDER_WIDTH));
         for (int i = 0; i < controller.getMaxColumn(); i++) {
             addColumnConstraint(i);
-            getColumnConstraints().add(new ColumnConstraints(BORDER_WIDTH));
+            getColumnConstraints().add(new ColumnConstraints(parentView.BORDER_WIDTH));
         }
 
         for (int i = 0; i < controller.getMaxRow(); i++)
@@ -66,27 +60,29 @@ public class CellSheetView extends GridPane {
         redraw();
     }
 
-    public void setFocusCell() {
+    public void setFocusedCell() {
         if (getScene() != null)
             getScene().lookup("#" + controller.getCurrentId()).requestFocus();
     }
 
     private void setBindings() {
-        hScrollBar.valueProperty().addListener((o, v1, v2) -> redraw());
-        vScrollBar.valueProperty().addListener((o, v1, v2) -> redraw());
+        parentView.hScrollBarValueProperty().addListener(inv -> redraw());
+        parentView.vScrollBarValueProperty().addListener(inv -> redraw());
+        parentView.spreadSheetWidth.addListener(inv -> redraw());
+        parentView.spreadSheetHeight.addListener(inv -> redraw());
     }
 
     public void redraw() {
-        double x = hScrollBar.valueProperty().doubleValue();
-        double y = vScrollBar.valueProperty().doubleValue();
-        setClip(new Rectangle(x, y, SPREAD_SHEET_WIDTH, SPREAD_SHEET_HEIGHT));
+        double x = parentView.hScrollBarValueProperty().doubleValue();
+        double y = parentView.vScrollBarValueProperty().doubleValue();
+        setClip(new Rectangle(x, y, parentView.spreadSheetWidth.get(), parentView.spreadSheetHeight.get()));
         setTranslateX(-x);
         setTranslateY(-y);
-        setFocusCell();
     }
 
     private void onCellMousePressed(MouseEvent event) {
-
+        TextField textField = (TextField)event.getSource();
+        controller.setCurrentCell((Cell)textField.getUserData());
     }
 
     private void onCellKeyPressed(KeyEvent event) {

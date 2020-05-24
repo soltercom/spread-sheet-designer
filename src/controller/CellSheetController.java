@@ -1,8 +1,10 @@
 package controller;
 
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import model.Cell;
 import model.SpreadSheet;
+import view.CellSheetView;
 
 public class CellSheetController {
 
@@ -10,31 +12,35 @@ public class CellSheetController {
     private int col;
 
     private final SpreadSheet model;
+    private final CellSheetView view;
 
-    public CellSheetController(SpreadSheet model) {
+    public CellSheetController(SpreadSheet model, CellSheetView view) {
         this.model = model;
+        this.view = view;
+        init();
+    }
+
+    private void init() {
         row = 0;
         col = 0;
+        Platform.runLater(view::setFocusedCell);
     }
 
     public void move(int dRow, int dCol) {
         int oldRow = row;
         int oldCol = col;
-        row = Math.max(0, Math.min(row+dRow, SpreadSheet.MAX_ROW-1));
-        col = Math.max(0, Math.min(col+dCol, SpreadSheet.MAX_COLUMN-1));
+        row = Math.max(0, Math.min(row+dRow, getMaxRow()-1));
+        col = Math.max(0, Math.min(col+dCol, getMaxColumn()-1));
 
-        /*if (dRow != 0 && oldRow == row)
-            //view.moveScrollBar(0, dRow);
-        else if (dCol != 0 && oldCol == col)
-            //view.moveScrollBar(dCol, 0);
-        else {
-            //view.setCellFocus();
-            //view.updateForm();
-        }*/
+        view.setFocusedCell();
     }
 
     public int getRow() { return row; }
     public int getCol() { return col; }
+    public void setCurrentCell(Cell cell) {
+        row = cell.getRow();
+        col = cell.getColumn();
+    }
     public int getMaxRow() { return SpreadSheet.MAX_ROW; }
     public int getMaxColumn() { return SpreadSheet.MAX_COLUMN; }
     public DoubleProperty getHeightProperty(int row) {

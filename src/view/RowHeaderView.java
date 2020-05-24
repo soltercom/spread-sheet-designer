@@ -49,7 +49,7 @@ public class RowHeaderView extends GridPane {
         parentView.spreadSheetHeight.addListener(inv -> redraw(parentView.vScrollBarValueProperty().get()));
     }
 
-    private void onLineDragged(@NotNull MouseEvent event) {
+    private void onLineDragged(MouseEvent event) {
         setCursor(Cursor.V_RESIZE);
         Line line = (Line)event.getSource();
         double dW = event.getY() - line.getStartY();

@@ -4,6 +4,7 @@ import controller.CellSheetController;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
@@ -20,6 +21,8 @@ import model.Cell;
 import model.SpreadSheet;
 
 public class CellSheetView extends GridPane {
+
+    private static final PseudoClass EDIT_CELL_CLASS = PseudoClass.getPseudoClass("edit");
 
     private final CellSheetController controller;
     private final SpreadSheetView parentView;
@@ -60,9 +63,17 @@ public class CellSheetView extends GridPane {
         redraw();
     }
 
-    public void setFocusedCell() {
+    private TextField getCurrentCell() {
         if (getScene() != null)
-            getScene().lookup("#" + controller.getCurrentId()).requestFocus();
+            return (TextField) getScene().lookup("#" + controller.getCurrentId());
+        else
+            return null;
+    }
+
+    public void setFocusedCell() {
+        TextField cell = getCurrentCell();
+        if (cell != null)
+            cell.requestFocus();
     }
 
     private void setBindings() {
@@ -96,6 +107,21 @@ public class CellSheetView extends GridPane {
             controller.move(0, -1);
     }
 
+    public void beforeEditCell() {
+        TextField cell = getCurrentCell();
+        if (cell != null)
+            cell.pseudoClassStateChanged(EDIT_CELL_CLASS, true);
+    }
+
+    public void afterEditCell() {
+        TextField cell = getCurrentCell();
+        if (cell != null) {
+            cell.setText(controller.getCurrentValue());
+            cell.requestFocus();
+            cell.pseudoClassStateChanged(EDIT_CELL_CLASS, false);
+        }
+    }
+
     private void addRowConstraint(int row) {
         DoubleProperty heightProperty = controller.getHeightProperty(row);
         RowConstraints constraints = new RowConstraints(heightProperty.get());
@@ -126,6 +152,7 @@ public class CellSheetView extends GridPane {
         textField.setOnKeyPressed(this::onCellKeyPressed);
         textField.setOnMousePressed(this::onCellMousePressed);
         textField.setId(controller.getId(row, col));
+        textField.getStyleClass().add("cell");
         return textField;
     }
 
@@ -143,6 +170,15 @@ public class CellSheetView extends GridPane {
         line.setStroke(Color.LIGHTGRAY);
         line.endYProperty().bind(heightProperty.add(1.0));
         return line;
+    }
+
+    public SpreadSheetView getParentView() {
+        return parentView;
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return SpreadSheetView.class.getResource("style.css").toExternalForm();
     }
 
 }

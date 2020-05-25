@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.VBox;
 import view.SpreadSheetView;
-import view.SpreadSheetViewFixed;
 
 import java.net.URL;
 import java.util.ResourceBundle;

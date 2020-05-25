@@ -8,8 +8,8 @@ import view.CellSheetView;
 
 public class CellSheetController {
 
-    private int row;
-    private int col;
+    private int row = 0;
+    private int col = 0;
 
     private final SpreadSheet model;
     private final CellSheetView view;
@@ -23,16 +23,15 @@ public class CellSheetController {
     private void init() {
         row = 0;
         col = 0;
-        Platform.runLater(view::setFocusedCell);
+        Platform.runLater(() -> move(0,0));
     }
 
     public void move(int dRow, int dCol) {
-        int oldRow = row;
-        int oldCol = col;
         row = Math.max(0, Math.min(row+dRow, getMaxRow()-1));
         col = Math.max(0, Math.min(col+dCol, getMaxColumn()-1));
 
         view.setFocusedCell();
+        view.getParentView().getFormView().setCell(getCell(row, col));
     }
 
     public int getRow() { return row; }
@@ -40,6 +39,7 @@ public class CellSheetController {
     public void setCurrentCell(Cell cell) {
         row = cell.getRow();
         col = cell.getColumn();
+        view.getParentView().getFormView().setCell(cell);
     }
     public int getMaxRow() { return SpreadSheet.MAX_ROW; }
     public int getMaxColumn() { return SpreadSheet.MAX_COLUMN; }
@@ -54,6 +54,9 @@ public class CellSheetController {
     }
     public String getValue(int row, int col) {
         return getCell(row, col).getValue();
+    }
+    public String getCurrentValue() {
+        return getValue(getRow(), getCol());
     }
     public String getId(int row, int col) {
         return getCell(row, col).getId();

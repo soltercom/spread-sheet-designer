@@ -1,22 +1,10 @@
-package view;
+package delete;
 
-import controller.SpreadSheetControllerFixed;
-import form.Form;
-import javafx.beans.property.DoubleProperty;
-import javafx.css.PseudoClass;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import model.Cell;
 
 public class SpreadSheetViewFixed extends GridPane {
 
-    private static final double CELL_WIDTH = 75.0D;
+/*    private static final double CELL_WIDTH = 75.0D;
     private static final double CELL_HEIGHT = 25.0D;
     private static final double SCROLL_BAR_WIDTH = 20.0D;
     private static final double FORM_WIDTH = 200.0D;
@@ -175,6 +163,6 @@ public class SpreadSheetViewFixed extends GridPane {
     @Override
     public String getUserAgentStylesheet() {
         return SpreadSheetViewFixed.class.getResource("style.css").toExternalForm();
-    }
+    }*/
 
 }

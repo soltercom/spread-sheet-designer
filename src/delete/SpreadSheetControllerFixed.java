@@ -1,13 +1,8 @@
-package controller;
-
-import javafx.application.Platform;
-import model.Cell;
-import model.SpreadSheetFixed;
-import view.SpreadSheetViewFixed;
+package delete;
 
 public class SpreadSheetControllerFixed {
 
-    private final SpreadSheetFixed model;
+/*    private final SpreadSheetFixed model;
     private final SpreadSheetViewFixed view;
 
     private int row;
@@ -70,6 +65,6 @@ public class SpreadSheetControllerFixed {
         return model.getCell(row+vScrollPosition, col+hScrollPosition);
     }
     public int getRow() { return row; }
-    public int getCol() { return col; }
+    public int getCol() { return col; }*/
 
 }

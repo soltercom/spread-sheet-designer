@@ -1,5 +1,6 @@
 package view;
 
+import form.Form;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -30,6 +31,7 @@ public class SpreadSheetView extends GridPane {
     private final ColumnHeaderView columnHeaderView;
     private final RowHeaderView rowHeaderView;
     private final CellSheetView cellSheetView;
+    private final Form formView;
 
     private final SpreadSheet model;
 
@@ -38,6 +40,7 @@ public class SpreadSheetView extends GridPane {
         columnHeaderView = new ColumnHeaderView(model.getColumnHeader(), this);
         rowHeaderView = new RowHeaderView(model.getRowHeader(), this);
         cellSheetView = new CellSheetView(model, this);
+        formView = new Form(this);
         init();
         setBindings();
     }
@@ -51,6 +54,7 @@ public class SpreadSheetView extends GridPane {
         constraintsSpreadSheetWidth.prefWidthProperty().bind(spreadSheetWidth);
         getColumnConstraints().add(constraintsSpreadSheetWidth);
         getColumnConstraints().add(new ColumnConstraints(SCROLL_BAR_WIDTH));
+        getColumnConstraints().add(new ColumnConstraints(FORM_WIDTH));
 
         getRowConstraints().add(new RowConstraints(COLUMN_HEADER_HEIGHT));
         RowConstraints constraintsSpreadSheetHeight = new RowConstraints();
@@ -77,6 +81,8 @@ public class SpreadSheetView extends GridPane {
 
         add(cellSheetView, 1, 1, 1, 1);
         setValignment(cellSheetView, VPos.TOP);
+
+        add(formView, 3, 1, 1, 3);
 
     }
 
@@ -106,6 +112,13 @@ public class SpreadSheetView extends GridPane {
     public DoubleProperty vScrollBarMaxProperty() {
         return vScrollBar.maxProperty();
     }
+
+    public Form getFormView() {
+        return formView;
+    }
+
+    public void beforeEditCell() { cellSheetView.beforeEditCell(); }
+    public void afterEditCell() { cellSheetView.afterEditCell(); }
 
     @Override
     public String getUserAgentStylesheet() {

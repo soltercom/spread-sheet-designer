@@ -13,7 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import model.Cell;
 import model.CellType;
-import view.SpreadSheetViewFixed;
+import view.SpreadSheetView;
 
 public class Form extends VBox {
 
@@ -38,10 +38,10 @@ public class Form extends VBox {
 
     private Cell cell;
 
-    private final SpreadSheetViewFixed view;
+    private final SpreadSheetView parentView;
 
-    public Form(SpreadSheetViewFixed view) {
-        this.view = view;
+    public Form(SpreadSheetView parentView) {
+        this.parentView = parentView;
         init();
         setBindings();
     }
@@ -78,8 +78,8 @@ public class Form extends VBox {
 
         focused.bind(Bindings.or(valueField.focusedProperty(), typeField.focusedProperty()));
         focused.addListener((o, oldValue, newValue) -> {
-            if (newValue) view.beforeEditCell();
-            else view.afterEditCell();
+            if (newValue) parentView.beforeEditCell();
+            else parentView.afterEditCell();
         });
 
     }
@@ -107,14 +107,14 @@ public class Form extends VBox {
 
     public void save() {
         if (cell.save(valueProperty.getValue(), typeProperty.getValue())) {
-            view.afterEditCell();
+            parentView.afterEditCell();
         }
     }
 
     public void cancel() {
         valueProperty.setValue(cell.valueProperty().getValue());
         typeProperty.setValue(cell.typeProperty().getValue());
-        view.afterEditCell();
+        parentView.afterEditCell();
     }
 
     @Override

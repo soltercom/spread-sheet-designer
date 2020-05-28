@@ -1,8 +1,8 @@
-package model;
+package delete;
 
 public class SpreadSheetFixed {
 
-    public final int MAX_COLUMN = 45;
+    /*public final int MAX_COLUMN = 45;
     public final int MAX_ROW = 75;
 
     private final Cell[][] cells = new Cell[MAX_ROW][MAX_COLUMN];
@@ -25,5 +25,5 @@ public class SpreadSheetFixed {
 
     public Cell getCell(int row, int col) {
         return cells[row][col];
-    }
+    }*/
 }

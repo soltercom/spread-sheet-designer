@@ -9,10 +9,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import model.Cell;
+import model.CellBorders;
 import model.CellType;
+import view.CellBordersView;
 import view.SpreadSheetView;
 
 public class Form extends VBox {
@@ -22,6 +25,11 @@ public class Form extends VBox {
 
     private TextField valueField;
     private ComboBox<CellType> typeField;
+    private Button editBordersButton;
+    private Line topLine;
+    private Line rightLine;
+    private Line bottomLine;
+    private Line leftLine;
 
     private final Button buttonOK = new Button("OK");
     private final Button buttonCancel = new Button("Отмена");
@@ -35,13 +43,17 @@ public class Form extends VBox {
     private final BooleanProperty valuePropertyValid = new SimpleBooleanProperty(true);
     private final ObjectProperty<CellType> typeProperty = new SimpleObjectProperty<>();
     private final BooleanProperty typePropertyChanged = new SimpleBooleanProperty(false);
+    private final ObjectProperty<CellBorders> bordersProperty = new SimpleObjectProperty<>(new CellBorders());
+    private final BooleanProperty bordersPropertyChanged = new SimpleBooleanProperty(false);
 
     private Cell cell;
 
     private final SpreadSheetView parentView;
+    private final CellBordersView cellBordersView;
 
     public Form(SpreadSheetView parentView) {
         this.parentView = parentView;
+        this.cellBordersView = new CellBordersView();
         init();
         setBindings();
     }
@@ -61,8 +73,12 @@ public class Form extends VBox {
         valueField.getStyleClass().add("simple-control");
         Label valueLabel = new Label("Значение");
         valueLabel.setLabelFor(valueField);
-        VBox.setMargin(valueField, new Insets(0, 0, 10.0, 0));
+        VBox.setMargin(valueField, new Insets(0, 5.0, 10.0, 0));
         getChildren().addAll(valueLabel, valueField);
+
+        GridPane bordersPreview = bordersPreview();
+        VBox.setMargin(bordersPreview, new Insets(0, 0, 20.0, 0));
+        getChildren().add(bordersPreview);
 
         getChildren().add(new HBox(5.0, buttonOK, buttonCancel));
     }
@@ -76,22 +92,39 @@ public class Form extends VBox {
         buttonCancel.disableProperty().bind(changed.not());
         buttonCancel.setOnAction(e -> this.cancel());
 
-        focused.bind(Bindings.or(valueField.focusedProperty(), typeField.focusedProperty()));
+        focused.bind(Bindings.or(valueField.focusedProperty(), typeField.focusedProperty()).or(editBordersButton.focusedProperty()));
         focused.addListener((o, oldValue, newValue) -> {
             if (newValue) parentView.beforeEditCell();
             else parentView.afterEditCell();
         });
 
+        CellBorders borders = bordersProperty.getValue();
+        topLine.fillProperty().bind(borders.topColorProperty());
+        rightLine.fillProperty().bind(borders.rightColorProperty());
+        bottomLine.fillProperty().bind(borders.bottomColorProperty());
+        leftLine.fillProperty().bind(borders.leftColorProperty());
+        topLine.visibleProperty().bind(borders.topBorderProperty());
+        rightLine.visibleProperty().bind(borders.rightBorderProperty());
+        bottomLine.visibleProperty().bind(borders.bottomBorderProperty());
+        leftLine.visibleProperty().bind(borders.leftBorderProperty());
+        topLine.opacityProperty().bind(borders.topOpacityProperty());
+        rightLine.opacityProperty().bind(borders.rightOpacityProperty());
+        bottomLine.opacityProperty().bind(borders.bottomOpacityProperty());
+        leftLine.opacityProperty().bind(borders.leftOpacityProperty());
+
     }
 
     public void setCell(Cell cell) {
         this.cell = cell;
-        valueProperty.setValue(cell.valueProperty().getValue());
+
+        valueProperty.set(cell.valueProperty().getValue());
         typeProperty.setValue(cell.typeProperty().getValue());
+        bordersProperty.getValue().setProperties(cell.bordersProperty().getValue());
 
         valuePropertyChanged.bind(valueProperty.isNotEqualTo(cell.valueProperty()));
         typePropertyChanged.bind(typeProperty.isNotEqualTo(cell.typeProperty()));
-        changed.bind(valuePropertyChanged.or(typePropertyChanged));
+        bordersPropertyChanged.bind(bordersProperty.getValue().isChanged(cell.bordersProperty()));
+        changed.bind(valuePropertyChanged.or(typePropertyChanged).or(bordersPropertyChanged));
 
         valuePropertyValid.bind(Bindings.createBooleanBinding(() -> {
             if (typeProperty.getValue() == CellType.TEXT) return true;
@@ -106,7 +139,7 @@ public class Form extends VBox {
     }
 
     public void save() {
-        if (cell.save(valueProperty.getValue(), typeProperty.getValue())) {
+        if (cell.save(valueProperty.getValue(), typeProperty.getValue(), bordersProperty.getValue())) {
             parentView.afterEditCell();
         }
     }
@@ -114,8 +147,50 @@ public class Form extends VBox {
     public void cancel() {
         valueProperty.setValue(cell.valueProperty().getValue());
         typeProperty.setValue(cell.typeProperty().getValue());
+        bordersProperty.getValue().setProperties(cell.bordersProperty().getValue());
         parentView.afterEditCell();
     }
+
+    public GridPane bordersPreview() {
+
+        double WIDTH = 200.0D;
+        double HEIGHT = 25.0D;
+
+        GridPane pane = new GridPane();
+
+        pane.getColumnConstraints().add(new ColumnConstraints(1.0D));
+        pane.getColumnConstraints().add(new ColumnConstraints(3.0D));
+        pane.getColumnConstraints().add(new ColumnConstraints(WIDTH));
+        pane.getColumnConstraints().add(new ColumnConstraints(3.0D));
+        pane.getColumnConstraints().add(new ColumnConstraints(1.0D));
+
+        pane.getRowConstraints().add(new RowConstraints(1.0D));
+        pane.getRowConstraints().add(new RowConstraints(3.0D));
+        pane.getRowConstraints().add(new RowConstraints(HEIGHT));
+        pane.getRowConstraints().add(new RowConstraints(3.0D));
+        pane.getRowConstraints().add(new RowConstraints(1.0D));
+
+        topLine = new Line(0, 0, WIDTH, 0);
+        rightLine = new Line(0, 0, 0, HEIGHT);
+        bottomLine = new Line(0, 0, WIDTH, 0);
+        leftLine = new Line(0, 0, 0, HEIGHT);
+        pane.add(topLine, 2, 0, 1, 1);
+        pane.add(leftLine, 0, 2, 1, 1);
+        pane.add(rightLine, 4, 2, 1, 1);
+        pane.add(bottomLine, 2, 4, 1, 1);
+
+        editBordersButton = new Button("Редакировать границы");
+        editBordersButton.setPrefSize(WIDTH, HEIGHT);
+        pane.add(editBordersButton, 2, 2, 1, 1);
+        editBordersButton.setOnAction(e -> {
+            cellBordersView.edit(bordersProperty.getValue())
+                    .ifPresent(result -> bordersProperty.getValue().setProperties(result));
+            editBordersButton.requestFocus();
+        });
+
+        return pane;
+    }
+
 
     @Override
     public String getUserAgentStylesheet() {

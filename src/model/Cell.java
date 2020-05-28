@@ -10,18 +10,20 @@ public class Cell {
 
     private final int row;
     private final int col;
-    private StringProperty value = new SimpleStringProperty("");
-    private ObjectProperty<CellType> type = new SimpleObjectProperty<>();
+    private final StringProperty value = new SimpleStringProperty("");
+    private final ObjectProperty<CellType> type = new SimpleObjectProperty<>();
+    private final ObjectProperty<CellBorders> borders = new SimpleObjectProperty<>(new CellBorders());
 
-    public Cell(int row, int col, String value, CellType type) {
+    public Cell(int row, int col, String value, CellType type, CellBorders borders) {
         this.row = row;
         this.col = col;
         this.value.setValue(value);
         this.type.setValue(type);
+        this.borders.setValue(borders);
     }
 
     public Cell(int row, int column) {
-        this(row, column, "", CellType.TEXT);
+        this(row, column, "", CellType.TEXT, new CellBorders());
     }
 
     public boolean isChanged(StringProperty valueProperty, ObjectProperty<CellType> typeProperty) {
@@ -29,9 +31,10 @@ public class Cell {
                 && typeProperty.getValue().equals(this.typeProperty().getValue()));
     }
 
-    public boolean save(String value, CellType type) {
+    public boolean save(String value, CellType type, CellBorders borders) {
         if (setValue(value, type)) {
             this.type.setValue(type);
+            this.borders.getValue().setProperties(borders);
             return true;
         } else {
             return false;
@@ -58,6 +61,7 @@ public class Cell {
     public ObjectProperty<CellType> typeProperty() {
         return type;
     }
+    public ObjectProperty<CellBorders> bordersProperty() { return borders; }
     public boolean setValue(String value, CellType type) {
         if (type == CellType.TEXT) {
             this.value.setValue(value);

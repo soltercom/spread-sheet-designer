@@ -2,6 +2,9 @@ package view;
 
 import controller.CellSheetController;
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.css.PseudoClass;
@@ -18,6 +21,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import model.Cell;
+import model.CellBorders;
 import model.SpreadSheet;
 
 public class CellSheetView extends GridPane {
@@ -27,9 +31,16 @@ public class CellSheetView extends GridPane {
     private final CellSheetController controller;
     private final SpreadSheetView parentView;
 
+    private final TextField[][] cells;
+    private final Line[][] hLines;
+    private final Line[][] vLines;
+
     public CellSheetView(SpreadSheet model, SpreadSheetView parentView) {
         this.controller = new CellSheetController(model, this);
         this.parentView = parentView;
+        this.cells = new TextField[controller.getMaxRow()][controller.getMaxColumn()];
+        this.hLines = new Line[controller.getMaxRow()+1][controller.getMaxColumn()];
+        this.vLines = new Line[controller.getMaxRow()][controller.getMaxColumn()+1];
         init();
         setBindings();
     }
@@ -46,17 +57,29 @@ public class CellSheetView extends GridPane {
             getColumnConstraints().add(new ColumnConstraints(parentView.BORDER_WIDTH));
         }
 
-        for (int i = 0; i < controller.getMaxRow(); i++)
-            add(createVLine(i, 0), 0, i*2+1, 1, 1);
+        for (int i = 0; i < controller.getMaxRow(); i++) {
+            Line vLine = createVLine(i, 0);
+            vLines[i][0] = vLine;
+            add(vLine, 0, i*2+1, 1, 1);
+        }
 
-        for (int i = 0; i < controller.getMaxColumn(); i++)
-            add(createHLine(0, i), i*2+1, 0, 1, 1);
+
+        for (int i = 0; i < controller.getMaxColumn(); i++) {
+            Line hLine = createHLine(0, i);
+            hLines[0][i] = hLine;
+            add(hLine, i*2+1, 0, 1, 1);
+        }
+
 
         for (int i = 0; i < controller.getMaxRow(); i++) {
             for (int j = 0; j < controller.getMaxColumn(); j++) {
                 add(createCell(i, j), j*2+1, i*2+1, 1, 1);
-                add(createHLine(i, j), j*2+1, i*2+2, 1, 1);
-                add(createVLine(i, j), j*2+2, i*2+1, 1, 1);
+                Line hLine = createHLine(i, j);
+                hLines[i+1][j] = hLine;
+                add(hLine, j*2+1, i*2+2, 1, 1);
+                Line vLine = createVLine(i, j);
+                vLines[i][j+1] = vLine;
+                add(vLine, j*2+2, i*2+1, 1, 1);
             }
         }
 
@@ -81,6 +104,49 @@ public class CellSheetView extends GridPane {
         parentView.vScrollBarValueProperty().addListener(inv -> redraw());
         parentView.spreadSheetWidth.addListener(inv -> redraw());
         parentView.spreadSheetHeight.addListener(inv -> redraw());
+
+        int maxCol = controller.getMaxColumn();
+        int maxRow = controller.getMaxRow();
+        for (int col = 0; col < maxCol; col++) {
+            CellBorders topCellBorders = ((Cell)cells[0][col].getUserData()).bordersProperty().getValue();
+            hLines[0][col].visibleProperty().bind(topCellBorders.topBorderProperty());
+            hLines[0][col].strokeProperty().bind(topCellBorders.topColorProperty());
+
+            CellBorders bottomCellBorders = ((Cell)cells[maxRow-1][col].getUserData()).bordersProperty().getValue();
+            hLines[maxRow][col].visibleProperty().bind(bottomCellBorders.bottomBorderProperty());
+            hLines[maxRow][col].strokeProperty().bind(bottomCellBorders.bottomColorProperty());
+        }
+
+        for (int row = 0; row < maxRow; row++) {
+            CellBorders leftCellBorders = ((Cell)cells[row][0].getUserData()).bordersProperty().getValue();
+            vLines[row][0].visibleProperty().bind(leftCellBorders.leftBorderProperty());
+            vLines[row][0].strokeProperty().bind(leftCellBorders.leftColorProperty());
+
+            CellBorders rightCellBorders = ((Cell)cells[row][maxCol-1].getUserData()).bordersProperty().getValue();
+            vLines[row][maxCol].visibleProperty().bind(rightCellBorders.rightBorderProperty());
+            vLines[row][maxCol].strokeProperty().bind(rightCellBorders.rightColorProperty());
+        }
+
+        for (int row = 1; row < maxRow; row++) {
+            for (int col = 0; col < maxCol; col++) {
+                CellBorders topCellBorders = ((Cell)cells[row-1][col].getUserData()).bordersProperty().getValue();
+                CellBorders bottomCellBorders = ((Cell)cells[row][col].getUserData()).bordersProperty().getValue();
+
+                hLines[row][col].visibleProperty()
+                    .bind(topCellBorders.bottomBorderProperty().or(bottomCellBorders.topBorderProperty()));
+            }
+        }
+
+        for (int row = 0; row < maxRow; row++) {
+            for (int col = 1; col < maxCol; col++) {
+                CellBorders leftCellBorders = ((Cell)cells[row][col-1].getUserData()).bordersProperty().getValue();
+                CellBorders rightCellBorders = ((Cell)cells[row][col].getUserData()).bordersProperty().getValue();
+
+                vLines[row][col].visibleProperty()
+                    .bind(leftCellBorders.rightBorderProperty().or(rightCellBorders.leftBorderProperty()));
+            }
+        }
+
     }
 
     public void redraw() {
@@ -142,6 +208,7 @@ public class CellSheetView extends GridPane {
 
     TextField createCell(int row, int col) {
         TextField textField = new TextField(controller.getValue(row, col));
+        this.cells[row][col] = textField;
         textField.maxHeightProperty().bind(controller.getHeightProperty(row));
         textField.prefHeightProperty().bind(controller.getHeightProperty(row));
         textField.minHeightProperty().bind(controller.getHeightProperty(row));
@@ -159,7 +226,7 @@ public class CellSheetView extends GridPane {
     Line createHLine(int row, int col) {
         DoubleProperty widthProperty = controller.getWidthProperty(col);
         Line line = new Line(0, 0, widthProperty.add(1.0).get(), 0);
-        line.setStroke(Color.LIGHTGRAY);
+        //line.setStroke(parentView.EMPTY_COLOR);
         line.endXProperty().bind(widthProperty.add(1.0));
         return line;
     }
@@ -167,7 +234,7 @@ public class CellSheetView extends GridPane {
     Line createVLine(int row, int col) {
         DoubleProperty heightProperty = controller.getHeightProperty(row);
         Line line = new Line(0, 0, 0, heightProperty.add(1.0).get());
-        line.setStroke(Color.LIGHTGRAY);
+        //line.setStroke(parentView.EMPTY_COLOR);
         line.endYProperty().bind(heightProperty.add(1.0));
         return line;
     }

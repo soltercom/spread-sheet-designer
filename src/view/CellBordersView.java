@@ -27,8 +27,6 @@ public class CellBordersView extends GridPane {
     private final static ImageView BORDER_LEFT_IMAGE
             = new ImageView(getImage("border_left.png"));
 
-    //private final ObjectProperty<CellBorders> bordersProperty;
-
     private ToggleButton topButton;
     private ToggleButton rightButton;
     private ToggleButton bottomButton;

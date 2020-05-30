@@ -99,10 +99,10 @@ public class Form extends VBox {
         });
 
         CellBorders borders = bordersProperty.getValue();
-        topLine.fillProperty().bind(borders.topColorProperty());
-        rightLine.fillProperty().bind(borders.rightColorProperty());
-        bottomLine.fillProperty().bind(borders.bottomColorProperty());
-        leftLine.fillProperty().bind(borders.leftColorProperty());
+        topLine.strokeProperty().bind(borders.topColorProperty());
+        rightLine.strokeProperty().bind(borders.rightColorProperty());
+        bottomLine.strokeProperty().bind(borders.bottomColorProperty());
+        leftLine.strokeProperty().bind(borders.leftColorProperty());
         topLine.visibleProperty().bind(borders.topBorderProperty());
         rightLine.visibleProperty().bind(borders.rightBorderProperty());
         bottomLine.visibleProperty().bind(borders.bottomBorderProperty());
@@ -111,7 +111,6 @@ public class Form extends VBox {
         rightLine.opacityProperty().bind(borders.rightOpacityProperty());
         bottomLine.opacityProperty().bind(borders.bottomOpacityProperty());
         leftLine.opacityProperty().bind(borders.leftOpacityProperty());
-
     }
 
     public void setCell(Cell cell) {

@@ -1,18 +1,23 @@
 package model;
 
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.*;
 import javafx.scene.paint.Color;
+
+import javax.script.Bindings;
 
 public class CellBorders {
 
     private static class CellBorder {
 
-        private final BooleanProperty border = new SimpleBooleanProperty(false);
-        private final IntegerProperty opacity = new SimpleIntegerProperty(0);
-        private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.BLACK);
+        public static Color EMPTY_COLOR = Color.BLACK;
 
-        public CellBorder() {}
+        private final BooleanProperty border = new SimpleBooleanProperty(false);
+        private final IntegerProperty opacity = new SimpleIntegerProperty(100);
+        private final ObjectProperty<Color> color = new SimpleObjectProperty<>(EMPTY_COLOR);
+
+        public CellBorder() { }
 
         public BooleanProperty borderProperty() { return border; }
         public ObjectProperty<Color> colorProperty() { return color; }
@@ -23,6 +28,7 @@ public class CellBorders {
             .or(colorProperty().isNotEqualTo(border.colorProperty()))
             .or(opacityProperty().isNotEqualTo(border.opacityProperty()));
         }
+
     }
 
     private final ObjectProperty<CellBorder> top, right, bottom, left;
@@ -62,9 +68,9 @@ public class CellBorders {
     public BooleanProperty bottomBorderProperty() { return bottom.getValue().borderProperty(); }
     public BooleanProperty leftBorderProperty() { return left.getValue().borderProperty(); }
     public ObjectProperty<Color> topColorProperty() { return top.getValue().colorProperty(); }
-    public ObjectProperty<Color> rightColorProperty() { return top.getValue().colorProperty(); }
-    public ObjectProperty<Color> bottomColorProperty() { return top.getValue().colorProperty(); }
-    public ObjectProperty<Color> leftColorProperty() { return top.getValue().colorProperty(); }
+    public ObjectProperty<Color> rightColorProperty() { return right.getValue().colorProperty(); }
+    public ObjectProperty<Color> bottomColorProperty() { return bottom.getValue().colorProperty(); }
+    public ObjectProperty<Color> leftColorProperty() { return left.getValue().colorProperty(); }
     public IntegerProperty topOpacityProperty() { return top.getValue().opacityProperty(); }
     public IntegerProperty rightOpacityProperty() { return right.getValue().opacityProperty(); }
     public IntegerProperty bottomOpacityProperty() { return bottom.getValue().opacityProperty(); }

@@ -10,6 +10,7 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
 import model.SpreadSheet;
 
 public class SpreadSheetView extends GridPane {

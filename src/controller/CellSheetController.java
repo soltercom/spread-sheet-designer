@@ -2,6 +2,8 @@ package controller;
 
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.geometry.Pos;
 import model.Cell;
 import model.SpreadSheet;
 import view.CellSheetView;
@@ -48,6 +50,9 @@ public class CellSheetController {
     }
     public DoubleProperty getWidthProperty(int col) {
         return model.getColumnHeader().get(col).widthProperty();
+    }
+    public ObjectProperty<Pos> getPosProperty(int row, int col) {
+        return model.getCell(row, col).posProperty();
     }
     public Cell getCell(int row, int col) {
         return model.getCell(row, col);

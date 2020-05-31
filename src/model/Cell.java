@@ -5,6 +5,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.geometry.Pos;
 
 public class Cell {
 
@@ -13,17 +14,19 @@ public class Cell {
     private final StringProperty value = new SimpleStringProperty("");
     private final ObjectProperty<CellType> type = new SimpleObjectProperty<>();
     private final ObjectProperty<CellBorders> borders = new SimpleObjectProperty<>(new CellBorders());
+    private final ObjectProperty<Pos> pos = new SimpleObjectProperty<>(Pos.CENTER_LEFT);
 
-    public Cell(int row, int col, String value, CellType type, CellBorders borders) {
+    public Cell(int row, int col, String value, CellType type, CellBorders borders, Pos pos) {
         this.row = row;
         this.col = col;
         this.value.setValue(value);
         this.type.setValue(type);
         this.borders.setValue(borders);
+        this.pos.setValue(pos);
     }
 
     public Cell(int row, int column) {
-        this(row, column, "", CellType.TEXT, new CellBorders());
+        this(row, column, "", CellType.TEXT, new CellBorders(), Pos.CENTER_LEFT);
     }
 
     public boolean isChanged(StringProperty valueProperty, ObjectProperty<CellType> typeProperty) {
@@ -31,10 +34,11 @@ public class Cell {
                 && typeProperty.getValue().equals(this.typeProperty().getValue()));
     }
 
-    public boolean save(String value, CellType type, CellBorders borders) {
+    public boolean save(String value, CellType type, CellBorders borders, Pos pos) {
         if (setValue(value, type)) {
             this.type.setValue(type);
             this.borders.getValue().setProperties(borders);
+            this.pos.setValue(pos);
             return true;
         } else {
             return false;
@@ -62,6 +66,7 @@ public class Cell {
         return type;
     }
     public ObjectProperty<CellBorders> bordersProperty() { return borders; }
+    public ObjectProperty<Pos> posProperty() { return pos; }
     public boolean setValue(String value, CellType type) {
         if (type == CellType.TEXT) {
             this.value.setValue(value);

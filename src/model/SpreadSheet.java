@@ -20,7 +20,7 @@ public class SpreadSheet {
             rowHeader.add(new Row(i+1));
         for (int i = 0; i < MAX_ROW; i++)
             for (int j = 0; j < MAX_COLUMN; j++)
-                cells[i][j] = new Cell(i, j, "", CellType.TEXT, new CellBorders());
+                cells[i][j] = new Cell(i, j);
     }
 
     public ColumnHeader getColumnHeader() {

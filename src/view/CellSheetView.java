@@ -212,7 +212,7 @@ public class CellSheetView extends GridPane {
         textField.maxHeightProperty().bind(controller.getHeightProperty(row));
         textField.prefHeightProperty().bind(controller.getHeightProperty(row));
         textField.minHeightProperty().bind(controller.getHeightProperty(row));
-        textField.setAlignment(Pos.CENTER_LEFT);
+        textField.alignmentProperty().bind(controller.getPosProperty(row, col));
         textField.setEditable(false);
         textField.setBorder(null);
         textField.setUserData(controller.getCell(row, col));
@@ -226,7 +226,6 @@ public class CellSheetView extends GridPane {
     Line createHLine(int row, int col) {
         DoubleProperty widthProperty = controller.getWidthProperty(col);
         Line line = new Line(0, 0, widthProperty.add(1.0).get(), 0);
-        //line.setStroke(parentView.EMPTY_COLOR);
         line.endXProperty().bind(widthProperty.add(1.0));
         return line;
     }
@@ -234,7 +233,6 @@ public class CellSheetView extends GridPane {
     Line createVLine(int row, int col) {
         DoubleProperty heightProperty = controller.getHeightProperty(row);
         Line line = new Line(0, 0, 0, heightProperty.add(1.0).get());
-        //line.setStroke(parentView.EMPTY_COLOR);
         line.endYProperty().bind(heightProperty.add(1.0));
         return line;
     }

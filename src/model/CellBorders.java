@@ -1,7 +1,6 @@
 package model;
 
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.*;
 import javafx.scene.paint.Color;
 

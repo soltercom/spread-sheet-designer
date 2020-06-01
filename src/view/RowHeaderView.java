@@ -84,17 +84,23 @@ public class RowHeaderView extends GridPane {
         textField.maxHeightProperty().bind(model.get(index).heightProperty());
         textField.prefHeightProperty().bind(model.get(index).heightProperty());
         textField.minHeightProperty().bind(model.get(index).heightProperty());
+        textField.getStyleClass().add("row-header");
         return textField;
     }
 
     private Line createLine(int index) {
         Line line = new Line(0, 0, parentView.ROW_HEADER_WIDTH, 0);
-        line.setStroke(Color.WHITESMOKE);
         line.setOnMouseEntered(e -> setCursor(Cursor.V_RESIZE));
         line.setOnMouseExited(e -> setCursor(Cursor.DEFAULT));
         line.setUserData(index);
         line.setOnMouseDragged(this::onLineDragged);
+        line.getStyleClass().add("row-header-line");
         return line;
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return SpreadSheetView.class.getResource("style.css").toExternalForm();
     }
 
 }

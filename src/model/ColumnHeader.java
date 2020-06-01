@@ -1,5 +1,6 @@
 package model;
 
+import form.validator.Validators;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 
@@ -14,6 +15,8 @@ public class ColumnHeader {
     private DoubleBinding calculateWidth;
 
     private final DoubleProperty width = new SimpleDoubleProperty(0.0D);
+
+    private final List<Section> sectionList = new ArrayList<>();
 
     public ColumnHeader() {
         calculateWidth = width.add(BORDER_WIDTH);
@@ -39,4 +42,28 @@ public class ColumnHeader {
     public DoubleBinding calculateWidthProperty() {
         return calculateWidth;
     }
+
+    public boolean checkSectionName(String name) {
+        return sectionList.stream().map(Section::getName)
+                .noneMatch(sectionName -> sectionName.equals(name));
+    }
+
+    public boolean addSection(int start, int end, String name) {
+        if (!Validators.NAME.validate(name)) return false;
+
+        if (!checkSectionName(name)) return false;
+
+        if (sectionList.stream()
+            .anyMatch(section -> section.getStart() >= start && start <= section.getEnd())) return false;
+
+        if (sectionList.stream()
+                .anyMatch(section -> section.getStart() >= end && end <= section.getEnd())) return false;
+
+        return sectionList.add(new Section(start, end, name));
+    }
+
+    public boolean removeSection(Section section) {
+        return sectionList.remove(section);
+    }
+
 }

@@ -3,7 +3,9 @@ package view;
 import form.Form;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.control.ScrollBar;
@@ -14,6 +16,13 @@ import javafx.scene.paint.Color;
 import model.SpreadSheet;
 
 public class SpreadSheetView extends GridPane {
+
+    public enum ViewParts {
+        COLUMN_HEADER,
+        ROW_HEADER,
+        FORM,
+        CELL_SHEET
+    }
 
     public final double ROW_HEADER_WIDTH = 75.0D;
     public final double ROW_HEADER_HEIGHT = 25.0D;
@@ -33,6 +42,8 @@ public class SpreadSheetView extends GridPane {
     private final RowHeaderView rowHeaderView;
     private final CellSheetView cellSheetView;
     private final Form formView;
+
+    private final ObjectProperty<ViewParts> focusedViewPart = new SimpleObjectProperty<>();
 
     private final SpreadSheet model;
 
@@ -57,7 +68,7 @@ public class SpreadSheetView extends GridPane {
         getColumnConstraints().add(new ColumnConstraints(SCROLL_BAR_WIDTH));
         getColumnConstraints().add(new ColumnConstraints(FORM_WIDTH));
 
-        getRowConstraints().add(new RowConstraints(COLUMN_HEADER_HEIGHT));
+        getRowConstraints().add(new RowConstraints(COLUMN_HEADER_HEIGHT * 2));
         RowConstraints constraintsSpreadSheetHeight = new RowConstraints();
         constraintsSpreadSheetHeight.maxHeightProperty().bind(spreadSheetHeight);
         constraintsSpreadSheetHeight.minHeightProperty().bind(spreadSheetHeight);
@@ -95,7 +106,7 @@ public class SpreadSheetView extends GridPane {
                     .subtract(BORDER_WIDTH)
                     .subtract(FORM_WIDTH));
             spreadSheetHeight.bind(getScene().heightProperty()
-                    .subtract(COLUMN_HEADER_HEIGHT)
+                    .subtract(COLUMN_HEADER_HEIGHT*2)
                     .subtract(SCROLL_BAR_WIDTH)
                     .subtract(BORDER_WIDTH));
         });
@@ -125,5 +136,7 @@ public class SpreadSheetView extends GridPane {
     public String getUserAgentStylesheet() {
         return SpreadSheetView.class.getResource("style.css").toExternalForm();
     }
+
+    public ObjectProperty<ViewParts> focusedViewPartProperty() { return focusedViewPart; }
 
 }

@@ -108,8 +108,12 @@ public class Form extends VBox {
 
         focused.bind(Bindings.or(valueField.focusedProperty(), typeField.focusedProperty()).or(editBordersButton.focusedProperty()).or(posPropertyChanged));
         focused.addListener((o, oldValue, newValue) -> {
-            if (newValue) parentView.beforeEditCell();
-            else parentView.afterEditCell();
+            if (newValue) {
+                parentView.beforeEditCell();
+                parentView.focusedViewPartProperty().setValue(SpreadSheetView.ViewParts.FORM);
+            } else {
+                parentView.afterEditCell();
+            }
         });
 
         CellBorders borders = bordersProperty.getValue();
@@ -168,6 +172,7 @@ public class Form extends VBox {
         valuePropertyValid.addListener(inv -> valueField.pseudoClassStateChanged(INVALID_CLASS, !valuePropertyValid.getValue()));
 
         setAlignmentButtons();
+
     }
 
     public void save() {

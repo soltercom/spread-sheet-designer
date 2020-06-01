@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import model.Cell;
 import model.SpreadSheet;
 import view.CellSheetView;
+import view.SpreadSheetView;
 
 public class CellSheetController {
 
@@ -34,6 +35,8 @@ public class CellSheetController {
 
         view.setFocusedCell();
         view.getParentView().getFormView().setCell(getCell(row, col));
+
+        view.getParentView().focusedViewPartProperty().setValue(SpreadSheetView.ViewParts.CELL_SHEET);
     }
 
     public int getRow() { return row; }
@@ -42,6 +45,8 @@ public class CellSheetController {
         row = cell.getRow();
         col = cell.getColumn();
         view.getParentView().getFormView().setCell(cell);
+
+        view.getParentView().focusedViewPartProperty().setValue(SpreadSheetView.ViewParts.CELL_SHEET);
     }
     public int getMaxRow() { return SpreadSheet.MAX_ROW; }
     public int getMaxColumn() { return SpreadSheet.MAX_COLUMN; }

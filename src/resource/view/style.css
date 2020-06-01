@@ -1,6 +1,14 @@
 .column-header, .row-header {
-    -fx-background-color: ghostwhite;
-    -fx-border-color: lightgrey;
+    -fx-background-color: #eee;
+}
+
+.column-header-line, .row-header-line {
+    -fx-stroke: #666;
+}
+
+.column-header:selected, .row-header:selected {
+    -fx-background-color: #666;
+    -fx-text-fill: white;
 }
 
 .cell {

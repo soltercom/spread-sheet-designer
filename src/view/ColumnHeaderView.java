@@ -16,7 +16,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import main.Controller;
 import model.ColumnHeader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColumnHeaderView extends GridPane {
 
@@ -26,6 +30,7 @@ public class ColumnHeaderView extends GridPane {
     private final SpreadSheetView parentView;
 
     private final TextField[] headers;
+    private final List<TextField> sections = new ArrayList<>();
     private final ContextMenu headersContextMenu = new ContextMenu();
 
     public ColumnHeaderView(ColumnHeader model, SpreadSheetView parentView) {
@@ -52,7 +57,6 @@ public class ColumnHeaderView extends GridPane {
 
         redraw(0);
 
-        createHeadersContextMenu();
     }
 
     private void setBindings() {
@@ -70,7 +74,7 @@ public class ColumnHeaderView extends GridPane {
     }
 
     public void redraw(double dx) {
-        setClip(new Rectangle(dx, parentView.COLUMN_HEADER_HEIGHT, parentView.spreadSheetWidth.get(), parentView.COLUMN_HEADER_HEIGHT));
+        setClip(new Rectangle(dx, 0, parentView.spreadSheetWidth.get(), 2*parentView.COLUMN_HEADER_HEIGHT + parentView.BORDER_WIDTH));
         setTranslateX(-dx);
     }
 
@@ -84,8 +88,17 @@ public class ColumnHeaderView extends GridPane {
                 controller.unsetSelectedSection();
             }
         } else if (e.getButton() == MouseButton.SECONDARY) {
-            createHeadersContextMenu();
+            createHeadersContextMenu((int)((TextField)e.getSource()).getUserData());
             headersContextMenu.show((TextField)e.getSource(), Side.BOTTOM, 0, 0);
+        }
+    }
+
+    private void onSectionMousePressed(MouseEvent e) {
+        if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() > 1) {
+            TextField textField = (TextField) e.getSource();
+            String newName = controller.editSectionName(textField.getText());
+            if (newName != null)
+                textField.setText(newName);
         }
     }
 
@@ -100,6 +113,28 @@ public class ColumnHeaderView extends GridPane {
 
     private void addLineConstraints() {
         getColumnConstraints().add(new ColumnConstraints(parentView.BORDER_WIDTH));
+    }
+
+    public void createSection(int start, int end, String name) {
+        TextField textField = new TextField(name);
+        textField.setAlignment(Pos.CENTER_LEFT);
+        textField.setEditable(false);
+        textField.setBorder(null);
+        textField.setUserData(name);
+        textField.setOnMousePressed(this::onSectionMousePressed);
+        textField.getStyleClass().add("column-section");
+        sections.add(textField);
+        add(textField,2*start+1, 0, 2*(1+end-start), 1);
+    }
+
+    public void removeSection(String name) {
+        sections.stream()
+            .filter(item -> item.getUserData().equals(name))
+            .findFirst()
+            .ifPresent(textField -> {
+                sections.remove(textField);
+                getChildren().remove(textField);
+            });
     }
 
     private TextField createHeader(int index) {
@@ -125,21 +160,23 @@ public class ColumnHeaderView extends GridPane {
         return line;
     }
 
-    private void createHeadersContextMenu() {
+    private void createHeadersContextMenu(int columnIndex) {
         headersContextMenu.getItems().clear();
         if (controller.hasSelectedSection()) {
-            MenuItem item1 = new MenuItem("Создать секцию");
-            item1.setOnAction(System.out::println);
-            MenuItem item2 = new MenuItem("Удалить секцию");
-            item2.setOnAction(System.out::println);
-            headersContextMenu.getItems().addAll(item1, item2);
+            MenuItem item = new MenuItem("Создать секцию");
+            item.setOnAction(e -> controller.addSelectedSection());
+            headersContextMenu.getItems().add(item);
+        }
+        if (controller.isColumnInSection(columnIndex)) {
+            MenuItem item = new MenuItem("Удалить секцию");
+            item.setOnAction(e -> controller.removeSection(columnIndex));
+            headersContextMenu.getItems().add(item);
         }
     }
 
     public void updatePseudoClassHeaderSelected(int index, boolean state) {
         headers[index].pseudoClassStateChanged(SELECTED_CLASS, state);
     }
-
 
     @Override
     public String getUserAgentStylesheet() {

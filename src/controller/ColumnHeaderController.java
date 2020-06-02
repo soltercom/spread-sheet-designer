@@ -3,6 +3,7 @@ package controller;
 import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
+import javafx.scene.control.TextInputDialog;
 import model.ColumnHeader;
 import model.Section;
 import view.ColumnHeaderView;
@@ -47,6 +48,47 @@ public class ColumnHeaderController {
         updatePseudoClassHeaderSelected(false);
         selectedSection = selectedSection.add(index);
         updatePseudoClassHeaderSelected(true);
+    }
+
+    public String editSectionName(Section section) {
+        TextInputDialog sectionNameDialog = new TextInputDialog(section.getName());
+        sectionNameDialog.setTitle("Задайте имя области");
+        sectionNameDialog.setContentText("Имя области:");
+        sectionNameDialog.setHeaderText("");
+        sectionNameDialog.showAndWait()
+            .ifPresent(name -> {
+                if (model.checkSectionName(name)) section.setName(name);
+            });
+        return section.getName();
+    }
+
+    public String editSectionName(String name) {
+        Section section = model.getSectionByName(name);
+        if (section != null)
+            return editSectionName(section);
+        else
+            return null;
+    }
+
+    public void addSelectedSection() {
+        if (model.isSectionValid(selectedSection)) {
+            editSectionName(selectedSection);
+            if (model.addSection(selectedSection)) {
+                view.createSection(selectedSection.getStart(), selectedSection.getEnd(), selectedSection.getName());
+                unsetSelectedSection();
+            }
+        }
+    }
+
+    public void removeSection(int columnIndex) {
+        String name = model.getSectionName(columnIndex);
+        if (model.removeSection(columnIndex) && !name.isEmpty()) {
+            view.removeSection(name);
+        }
+    }
+
+    public boolean isColumnInSection(int index) {
+        return model.isColumnInSection(index);
     }
 
     public int size() {

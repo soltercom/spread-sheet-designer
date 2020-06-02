@@ -12,6 +12,12 @@ public class Section {
         this.name = name;
     }
 
+    public Section (Section section) {
+        start = section.getStart();
+        end = section.getEnd();
+        name = section.getName();
+    }
+
     public int getStart() {
         return start;
     }

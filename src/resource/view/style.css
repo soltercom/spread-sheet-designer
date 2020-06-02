@@ -11,6 +11,10 @@
     -fx-text-fill: white;
 }
 
+.column-section {
+    -fx-text-fill: #666666;
+}
+
 .cell {
     -fx-border-color: lightgrey;
 }

@@ -6,6 +6,7 @@ import javafx.beans.property.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ColumnHeader {
 
@@ -48,18 +49,46 @@ public class ColumnHeader {
                 .noneMatch(sectionName -> sectionName.equals(name));
     }
 
-    public boolean addSection(int start, int end, String name) {
-        if (!Validators.NAME.validate(name)) return false;
+    public String getSectionName(int columnIndex) {
+       return sectionList.stream()
+           .filter(item -> hitTest(item, columnIndex))
+           .map(Section::getName)
+           .findFirst().orElse("");
+    }
 
-        if (!checkSectionName(name)) return false;
+    public Section getSectionByName(String name) {
+        return sectionList.stream()
+                .filter(item -> item.getName().equals(name))
+                .findFirst().orElse(null);
+    }
 
+    private boolean hitTest(Section item, int columnIndex) {
+        return item.getStart() <= columnIndex && columnIndex <= item.getEnd();
+    }
+
+    public boolean isSectionValid(Section section) {
+        if (!Validators.NAME.validate(section.getName())) return false;
+        if (!checkSectionName(section.getName())) return false;
         if (sectionList.stream()
-            .anyMatch(section -> section.getStart() >= start && start <= section.getEnd())) return false;
-
+                .anyMatch(item -> hitTest(item, section.getStart()))) return false;
         if (sectionList.stream()
-                .anyMatch(section -> section.getStart() >= end && end <= section.getEnd())) return false;
+                .anyMatch(item -> hitTest(item, section.getEnd()))) return false;
+        return true;
+    }
 
-        return sectionList.add(new Section(start, end, name));
+    public boolean addSection(Section section) {
+        if (!isSectionValid(section)) return false;
+        return sectionList.add(new Section(section));
+    }
+
+    public boolean removeSection(int columnIndex) {
+        if (!isColumnInSection(columnIndex)) return false;
+        return sectionList.removeIf(item -> hitTest(item, columnIndex));
+    }
+
+    public boolean isColumnInSection(int columnIndex) {
+        return sectionList.stream()
+            .anyMatch(item -> hitTest(item, columnIndex));
     }
 
     public boolean removeSection(Section section) {

@@ -1,5 +1,6 @@
 package model;
 
+import form.validator.Validators;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -7,7 +8,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RowHeader {
+public class RowHeader extends Header {
 
     private final double BORDER_HEIGHT = 1.0D;
 
@@ -17,6 +18,7 @@ public class RowHeader {
     private final DoubleProperty height = new SimpleDoubleProperty(0.0D);
 
     public RowHeader() {
+        super();
         calculateHeight = height.add(BORDER_HEIGHT);
     }
 
@@ -25,20 +27,17 @@ public class RowHeader {
         calculateHeight = calculateHeight.add(row.heightProperty()).add(BORDER_HEIGHT);
     }
 
-    public Row get(int index) {
-        return list.get(index);
+    public DoubleProperty getLengthProperty(int index) {
+        return list.get(index).heightProperty();
     }
 
     public int size() { return list.size(); }
 
-    public DoubleProperty heightProperty() {
-        return height;
-    }
+    public void addLength(int index, double dH) { list.get(index).addHeight(dH); }
 
-    public void addRowHeight(int index, double dH) { get(index).addHeight(dH); }
-
-    public DoubleBinding calculateHeightProperty() {
+    public DoubleBinding calculateLengthProperty() {
         return calculateHeight;
     }
 
+    public DoubleProperty getBorderLengthProperty() { return new SimpleDoubleProperty(BORDER_HEIGHT); }
 }

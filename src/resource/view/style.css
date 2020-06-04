@@ -11,7 +11,7 @@
     -fx-text-fill: white;
 }
 
-.column-section {
+.column-section, .row-section {
     -fx-text-fill: #666666;
 }
 

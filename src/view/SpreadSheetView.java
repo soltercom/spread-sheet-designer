@@ -59,7 +59,7 @@ public class SpreadSheetView extends GridPane {
 
     private void init() {
 
-        getColumnConstraints().add(new ColumnConstraints(ROW_HEADER_WIDTH));
+        getColumnConstraints().add(new ColumnConstraints(ROW_HEADER_WIDTH * 2));
         ColumnConstraints constraintsSpreadSheetWidth = new ColumnConstraints();
         constraintsSpreadSheetWidth.maxWidthProperty().bind(spreadSheetWidth);
         constraintsSpreadSheetWidth.minWidthProperty().bind(spreadSheetWidth);

@@ -1,6 +1,6 @@
 package view;
 
-import controller.ColumnHeaderController;
+import controller.HeaderController;
 import javafx.beans.property.DoubleProperty;
 import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
@@ -22,11 +22,11 @@ import model.ColumnHeader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColumnHeaderView extends GridPane {
+public class ColumnHeaderView extends GridPane implements HeaderView {
 
     private static final PseudoClass SELECTED_CLASS = PseudoClass.getPseudoClass("selected");
 
-    private final ColumnHeaderController controller;
+    private final HeaderController controller;
     private final SpreadSheetView parentView;
 
     private final TextField[] headers;
@@ -34,7 +34,7 @@ public class ColumnHeaderView extends GridPane {
     private final ContextMenu headersContextMenu = new ContextMenu();
 
     public ColumnHeaderView(ColumnHeader model, SpreadSheetView parentView) {
-        controller = new ColumnHeaderController(model, this);
+        controller = new HeaderController(model, this);
         this.parentView = parentView;
         headers = new TextField[model.size()];
         init();
@@ -56,13 +56,17 @@ public class ColumnHeaderView extends GridPane {
         }
 
         redraw(0);
-
     }
 
     private void setBindings() {
-        parentView.hScrollBarMaxProperty().bind(controller.calculateWidthProperty().subtract(parentView.spreadSheetWidth));
+        parentView.hScrollBarMaxProperty().bind(controller.calculateLengthProperty().subtract(parentView.spreadSheetWidth));
         parentView.hScrollBarValueProperty().addListener((o, v1, v2) -> redraw(v2.doubleValue()));
         parentView.spreadSheetWidth.addListener(inv -> redraw(parentView.hScrollBarValueProperty().get()));
+
+        parentView.focusedViewPartProperty().addListener((o, oldValue, newValue) -> {
+            if (!newValue.equals(SpreadSheetView.ViewParts.COLUMN_HEADER) && controller.hasSelectedSection())
+                controller.unsetSelectedSection();
+        });
     }
 
     private void onLineDragged(MouseEvent event) {
@@ -70,7 +74,7 @@ public class ColumnHeaderView extends GridPane {
         Line line = (Line)event.getSource();
         double dW = event.getX() - line.getStartX();
         int index = (int)line.getUserData();
-        controller.addColumnWidth(index, dW);
+        controller.addLength(index, dW);
     }
 
     public void redraw(double dx) {
@@ -97,13 +101,15 @@ public class ColumnHeaderView extends GridPane {
         if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() > 1) {
             TextField textField = (TextField) e.getSource();
             String newName = controller.editSectionName(textField.getText());
-            if (newName != null)
+            if (newName != null) {
                 textField.setText(newName);
+                textField.setUserData(newName);
+            }
         }
     }
 
     private void addHeaderConstraints(int index) {
-        DoubleProperty widthProperty = controller.getWidthProperty(index);
+        DoubleProperty widthProperty = controller.getLengthProperty(index);
         ColumnConstraints constraints = new ColumnConstraints(widthProperty.get());
         constraints.prefWidthProperty().bind(widthProperty);
         constraints.minWidthProperty().bind(widthProperty);
@@ -167,7 +173,7 @@ public class ColumnHeaderView extends GridPane {
             item.setOnAction(e -> controller.addSelectedSection());
             headersContextMenu.getItems().add(item);
         }
-        if (controller.isColumnInSection(columnIndex)) {
+        if (controller.isCellInSection(columnIndex)) {
             MenuItem item = new MenuItem("Удалить секцию");
             item.setOnAction(e -> controller.removeSection(columnIndex));
             headersContextMenu.getItems().add(item);
@@ -181,10 +187,6 @@ public class ColumnHeaderView extends GridPane {
     @Override
     public String getUserAgentStylesheet() {
         return SpreadSheetView.class.getResource("style.css").toExternalForm();
-    }
-
-    public SpreadSheetView getParentView() {
-        return parentView;
     }
 
 }

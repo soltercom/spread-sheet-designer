@@ -51,10 +51,10 @@ public class CellSheetController {
     public int getMaxRow() { return SpreadSheet.MAX_ROW; }
     public int getMaxColumn() { return SpreadSheet.MAX_COLUMN; }
     public DoubleProperty getHeightProperty(int row) {
-        return model.getRowHeader().get(row).heightProperty();
+        return model.getRowHeader().getLengthProperty(row);
     }
     public DoubleProperty getWidthProperty(int col) {
-        return model.getColumnHeader().get(col).widthProperty();
+        return model.getColumnHeader().getLengthProperty(col);
     }
     public ObjectProperty<Pos> getPosProperty(int row, int col) {
         return model.getCell(row, col).posProperty();

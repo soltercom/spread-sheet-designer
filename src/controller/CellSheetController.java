@@ -1,13 +1,20 @@
 package controller;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Pos;
+import model.Area;
 import model.Cell;
 import model.SpreadSheet;
 import view.CellSheetView;
 import view.SpreadSheetView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CellSheetController {
 
@@ -17,10 +24,14 @@ public class CellSheetController {
     private final SpreadSheet model;
     private final CellSheetView view;
 
+    private Area selectedArea;
+    private List<Area> areaList = new ArrayList<>();
+
     public CellSheetController(SpreadSheet model, CellSheetView view) {
         this.model = model;
         this.view = view;
         init();
+        unsetSelectedArea();
     }
 
     private void init() {
@@ -39,6 +50,37 @@ public class CellSheetController {
         view.getParentView().focusedViewPartProperty().setValue(SpreadSheetView.ViewParts.CELL_SHEET);
     }
 
+    public void createArea() {
+        areaList.add(selectedArea);
+        view.redrawArea(selectedArea, true);
+        unsetSelectedArea();
+    }
+
+    private void updateSelectedAreaView(boolean state) {
+        if (selectedArea == null || selectedArea.getStartRow() < 0 || selectedArea.getStartColumn() < 0) return;
+        for (int row = selectedArea.getStartRow(); row <= selectedArea.getEndRow() ; row++)
+            for (int col = selectedArea.getStartColumn(); col <= selectedArea.getEndColumn() ; col++)
+                view.updatePseudoClassSelectedArea(row, col, state);
+    }
+
+    public void unsetSelectedArea() {
+        updateSelectedAreaView(false);
+        selectedArea = Area.EMPTY_AREA;
+    }
+
+    public void setSelectedArea(Cell cell) {
+        updateSelectedAreaView(false);
+        selectedArea = selectedArea.setRange(cell.getRow(), cell.getColumn());
+        updateSelectedAreaView(true);
+    }
+
+    public boolean isCellInSelectedArea(Cell cell) {
+        return selectedArea.getStartRow() <= cell.getRow()
+            && cell.getRow() <= selectedArea.getEndRow()
+            && selectedArea.getStartColumn() <= cell.getColumn()
+            && cell.getColumn() <= selectedArea.getEndColumn();
+    }
+
     public int getRow() { return row; }
     public int getCol() { return col; }
     public void setCurrentCell(Cell cell) {
@@ -52,6 +94,13 @@ public class CellSheetController {
     public int getMaxColumn() { return SpreadSheet.MAX_COLUMN; }
     public DoubleProperty getHeightProperty(int row) {
         return model.getRowHeader().getLengthProperty(row);
+    }
+    public DoubleBinding getHeightProperty(int startRow, int endRow) {
+        DoubleBinding height = Bindings.createDoubleBinding(() -> -1.0D);
+        for (int row = startRow; row <= endRow ; row++) {
+            height = height.add(getHeightProperty(row)).add(1.0D);
+        }
+        return height;
     }
     public DoubleProperty getWidthProperty(int col) {
         return model.getColumnHeader().getLengthProperty(col);
@@ -73,6 +122,9 @@ public class CellSheetController {
     }
     public String getCurrentId() {
         return getCell(row, col).getId();
+    }
+    public boolean hasSelectedArea() {
+        return selectedArea != null && selectedArea.getStartRow() >= 0;
     }
 
 }

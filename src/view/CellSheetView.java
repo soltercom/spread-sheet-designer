@@ -9,10 +9,11 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TextField;
+import javafx.geometry.Side;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -20,20 +21,27 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import model.Area;
 import model.Cell;
 import model.CellBorders;
 import model.SpreadSheet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CellSheetView extends GridPane {
 
     private static final PseudoClass EDIT_CELL_CLASS = PseudoClass.getPseudoClass("edit");
+    private static final PseudoClass SELECTED_AREA_CLASS = PseudoClass.getPseudoClass("selected-area");
 
     private final CellSheetController controller;
     private final SpreadSheetView parentView;
 
+    private final List<TextField> areas = new ArrayList<>();
     private final TextField[][] cells;
     private final Line[][] hLines;
     private final Line[][] vLines;
+    private final ContextMenu areasContextMenu = new ContextMenu();
 
     public CellSheetView(SpreadSheet model, SpreadSheetView parentView) {
         this.controller = new CellSheetController(model, this);
@@ -63,13 +71,11 @@ public class CellSheetView extends GridPane {
             add(vLine, 0, i*2+1, 1, 1);
         }
 
-
         for (int i = 0; i < controller.getMaxColumn(); i++) {
             Line hLine = createHLine(0, i);
             hLines[0][i] = hLine;
             add(hLine, i*2+1, 0, 1, 1);
         }
-
 
         for (int i = 0; i < controller.getMaxRow(); i++) {
             for (int j = 0; j < controller.getMaxColumn(); j++) {
@@ -147,6 +153,11 @@ public class CellSheetView extends GridPane {
             }
         }
 
+        parentView.focusedViewPartProperty().addListener((o, oldValue, newValue) -> {
+            if (!newValue.equals(SpreadSheetView.ViewParts.CELL_SHEET) && controller.hasSelectedArea())
+                controller.unsetSelectedArea();
+        });
+
     }
 
     public void redraw() {
@@ -157,9 +168,30 @@ public class CellSheetView extends GridPane {
         setTranslateY(-y);
     }
 
+    public void redrawArea(Area area, boolean state) {
+        for (int row = area.getStartRow(); row <= area.getEndRow() ; row++) {
+            for (int col = area.getStartColumn(); col <= area.getEndColumn(); col++) {
+                getChildren().remove(cells[row][col]);
+            }
+        }
+        TextField textField = createArea(area.getStartRow(), area.getEndRow());
+        add(textField, 2*area.getStartColumn()+1, 2*area.getStartRow()+1, 2*(area.getEndColumn()-area.getStartColumn())+1, 2*(area.getEndRow()-area.getStartRow())+1);
+        textField.requestFocus();
+    }
+
     private void onCellMousePressed(MouseEvent event) {
         TextField textField = (TextField)event.getSource();
-        controller.setCurrentCell((Cell)textField.getUserData());
+        Cell cell = (Cell)textField.getUserData();
+        if (event.getButton() == MouseButton.PRIMARY) {
+            if (event.isControlDown()) {
+                controller.setSelectedArea(cell);
+            } else {
+                controller.setCurrentCell(cell);
+                controller.unsetSelectedArea();
+            }
+        } else if (event.getButton() == MouseButton.SECONDARY) {
+            setAreasContextMenu(cell);
+        }
     }
 
     private void onCellKeyPressed(KeyEvent event) {
@@ -220,6 +252,24 @@ public class CellSheetView extends GridPane {
         textField.setOnMousePressed(this::onCellMousePressed);
         textField.setId(controller.getId(row, col));
         textField.getStyleClass().add("cell");
+        textField.setContextMenu(areasContextMenu);
+        return textField;
+    }
+
+    TextField createArea(int startRow, int endRow) {
+        TextField textField = new TextField("TEST");
+        textField.maxHeightProperty().bind(controller.getHeightProperty(startRow, endRow));
+        textField.prefHeightProperty().bind(controller.getHeightProperty(startRow, endRow));
+        textField.minHeightProperty().bind(controller.getHeightProperty(startRow, endRow));
+        /*textField.alignmentProperty().bind(controller.getPosProperty(row, col));*/
+        textField.setEditable(false);
+        textField.setBorder(null);
+        /*textField.setUserData(controller.getCell(row, col));
+        textField.setOnKeyPressed(this::onCellKeyPressed);
+        textField.setOnMousePressed(this::onCellMousePressed);
+        textField.setId(controller.getId(row, col));
+        textField.getStyleClass().add("cell");
+        textField.setContextMenu(areasContextMenu);*/
         return textField;
     }
 
@@ -237,8 +287,21 @@ public class CellSheetView extends GridPane {
         return line;
     }
 
+    private void setAreasContextMenu(Cell cell) {
+        areasContextMenu.getItems().clear();
+        if (controller.isCellInSelectedArea(cell)) {
+            MenuItem item = new MenuItem("Объединить");
+            item.setOnAction(e -> controller.createArea());
+            areasContextMenu.getItems().add(item);
+        }
+    }
+
     public SpreadSheetView getParentView() {
         return parentView;
+    }
+
+    public void updatePseudoClassSelectedArea(int row, int col, boolean state) {
+        cells[row][col].pseudoClassStateChanged(SELECTED_AREA_CLASS, state);
     }
 
     @Override

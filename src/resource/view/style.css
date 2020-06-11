@@ -29,3 +29,8 @@
     -fx-text-fill: white;
 }
 
+/*noinspection CssInvalidPseudoSelector*/
+.cell:selected-area {
+    -fx-background-color: #666666;
+}
+

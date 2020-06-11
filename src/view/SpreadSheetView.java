@@ -110,6 +110,7 @@ public class SpreadSheetView extends GridPane {
                     .subtract(SCROLL_BAR_WIDTH)
                     .subtract(BORDER_WIDTH));
         });
+
     }
 
     public DoubleProperty hScrollBarValueProperty() {

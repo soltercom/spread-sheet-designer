@@ -1,6 +1,5 @@
 package model;
 
-import form.validator.Validators;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 

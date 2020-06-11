@@ -89,7 +89,7 @@ public class RowHeaderView extends GridPane implements HeaderView {
 
     private void onHeaderMousePressed(MouseEvent e) {
         if (e.getButton() == MouseButton.PRIMARY) {
-            parentView.focusedViewPartProperty().setValue(SpreadSheetView.ViewParts.COLUMN_HEADER);
+            parentView.focusedViewPartProperty().setValue(SpreadSheetView.ViewParts.ROW_HEADER);
             if (e.isControlDown()) {
                 int index = (int) ((TextField) e.getSource()).getUserData();
                 controller.setSelectedSection(index);
